@@ -1,17 +1,25 @@
 defmodule Todolist.Todolist do
-  alias Todolist.MultiDict
-  @type todo_list() :: %{date: Date.t(), title: String.t()}
-  @type entry() :: %{date: Date.t(), title: String.t()}
+  alias Todolist.Todolist
 
-  def new(), do: MultiDict.new()
+  defstruct auto_id: 1, entries: %{}
 
-  @spec add_entry(todo_list(), entry()) :: todo_list()
+  def new(), do: %Todolist{}
+
   def add_entry(todo_list, entry) do
-    MultiDict.add(todo_list, entry.date, entry)
+    # Sets the new entry's ID
+    entry = Map.put(entry, :id, todo_list.auto_id)
+    # Adds the new entry to the entries list
+    new_entries = Map.put(todo_list.entries, todo_list.auto_id, entry)
+
+    # Updates the struct
+    %Todolist{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
   end
 
-  @spec entries(todo_list(), Date.t()) :: String.t()
   def entries(todo_list, date) do
-    MultiDict.get(todo_list, date)
+    todo_list.entries
+    # Filtering for a given date
+    |> Stream.filter(fn {_, entry} -> entry.date == date end)
+    # Takes only the values
+    |> Enum.map(fn {_, entry} -> entry end)
   end
 end
