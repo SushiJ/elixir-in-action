@@ -22,4 +22,23 @@ defmodule Todolist.Todolist do
     # Takes only the values
     |> Enum.map(fn {_, entry} -> entry end)
   end
+
+  def update_entry(todo_list, id, lambda) do
+    # Check if entry exists
+    case Map.fetch(todo_list.entries, id) do
+      :error ->
+        todo_list
+
+      {:ok, old_entry} ->
+        old_entry_id = old_entry.id
+        new_entry = %{id: ^old_entry_id} = lambda.(old_entry)
+        #                 ^ matching on value
+        new_entry = Map.put(todo_list.entries, new_entry.id, new_entry)
+        %Todolist{todo_list | entries: new_entry}
+    end
+  end
+
+  def delete_entry(todo_list, id) do
+    %Todolist{todo_list | entries: Map.delete(todo_list.entries, id)}
+  end
 end
